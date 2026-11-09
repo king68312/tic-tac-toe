@@ -2,3 +2,5 @@ a.out
 build/
 *.o
 rust/target/
+main.js
+elm-stuff/
