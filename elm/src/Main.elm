@@ -9,28 +9,12 @@ import List exposing (drop, take)
 import String exposing (join)
 
 
+
+-- MODEL
+
+
 type alias Model =
     { count : Int, board : Array Cell, turn : Cell, flag : Bool }
-
-
-
--- initialBoard : Model
--- initialBoard =
---     { count = 0
---     , board =
---         [ Empty
---         , Empty
---         , Empty
---         , Empty
---         , O
---         , Empty
---         , Empty
---         , Empty
---         , Empty
---         ]
---     , turn = X
---     , flag = False
---     }
 
 
 initialBoard : Model
@@ -78,19 +62,14 @@ cellToString cell =
             "o"
 
 
+
+-- UPDATE
+
+
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         Clicked index ->
-            -- placeAt       Cell->Int->Int->Cell->Cell
-            -- indexedMap : (Int -> a -> b) -> List a -> List b
-            -- placeAt model.turn index  Cell->Int->Cell->Cell　これはindexecMapの引数(Int->a->b)と一致する。
-            -- model.boardはList cellなので正しい
-            -- markを入れた状態のマスのCellを返す
-            -- ここでしたい処理は
-            -- newBoard =
-            --     List.indexedMap (placeAt model.turn index) model.board
-            -- indexにボードが置ける場合
             case Array.get index model.board of
                 Just Empty ->
                     { model | board = Array.set index model.turn model.board, turn = nextTurn model.turn }
@@ -98,36 +77,11 @@ update msg model =
                 _ ->
                     model
 
-        --            else
-        --                { model | board = newBoard, turn = nextTurn model.turn }
-        {-
-           case List.head (List.drop index model.board) of
-               Just cell ->
-                   case cell of
-                       Empty ->
-                           { model | board = List.indexedMap (\i c -> if i == index then X else c) model.board}
-                       _ ->
-                               model
-               Nothing ->
-                   model
-        -}
         PrintBoard ->
             { model | flag = True }
 
         Reset ->
             initialBoard
-
-
-
--- placeAt indexで targetは入っている状態。マスの番号とマスはList.indexedMapで1マスずつ渡していく
--- indexedMapは(Int -> a -> b) -> List a -> List b
--- placeAt : Cell -> Int -> Int -> Cell -> Cell
--- placeAt mark target i c =
---     if i == target && c == Empty then
---         mark
---
---     else
---         c
 
 
 nextTurn : Cell -> Cell
@@ -139,21 +93,16 @@ nextTurn cell =
         O ->
             X
 
+        -- O or X is OK
         Empty ->
             O
 
 
 
--- modelで画面を構成する要素として必要
+-- VIEW
 
 
 view : Model -> Html Msg
-
-
-
--- 出たMsgをうけてupdateで新しく画面を作る
-
-
 view model =
     div []
         [ viewboard model.board
@@ -178,27 +127,6 @@ resultText board =
         "引き分け"
 
 
-
-{-
-   viewboard: List Cell -> Html msg
-   viewboard board =
-       let
-           -- List Cell内部のCellをcellToStringでCell->Stringに変換
-           cells = List.map cellToString board
-       in
-       text
-           (String.join "\n"
-               [ String.join "|" (take 3 cells)
-               , "------"
-               , String.join "|" (take 3 (drop 3 cells))
-               , "------"
-               , String.join "|" (take 3 (drop 6 cells))
-               ]
-           )
-
--}
-
-
 viewboard : Array Cell -> Html Msg
 viewboard board =
     let
@@ -219,9 +147,18 @@ viewCell index cell =
 
 
 cellAt : Int -> Array Cell -> Cell
+
+
+
+-- cellAt i board =
+--     drop i (Array.toList board)
+--         |> List.head
+--         |> Maybe.withDefault Empty
+-- cellAt : Int -> Array Cell -> Cell
+
+
 cellAt i board =
-    drop i (Array.toList board)
-        |> List.head
+    Array.get i board
         |> Maybe.withDefault Empty
 
 
