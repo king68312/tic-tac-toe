@@ -6,7 +6,6 @@ import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import List exposing (drop, take)
-import String exposing (join)
 
 
 
@@ -14,7 +13,7 @@ import String exposing (join)
 
 
 type alias Model =
-    { count : Int, board : Array Cell, turn : Cell, flag : Bool }
+    { board : Array Cell, turn : Cell, flag : Bool }
 
 
 initialBoard : Model
@@ -31,7 +30,6 @@ initialBoard =
             , Empty
             , Empty
             ]
-    , count = 0
     , turn = X
     , flag = False
     }
@@ -39,7 +37,6 @@ initialBoard =
 
 type Msg
     = Clicked Int
-    | PrintBoard
     | Reset
 
 
@@ -77,9 +74,6 @@ update msg model =
                 _ ->
                     model
 
-        PrintBoard ->
-            { model | flag = True }
-
         Reset ->
             initialBoard
 
@@ -113,18 +107,20 @@ view model =
 
 resultText : Array Cell -> String
 resultText board =
-    if judge X board then
-        "x の勝ち"
+    case winner board of
+        Just X ->
+            "x の勝ち"
 
-    else if judge O board then
-        "o の勝ち"
+        Just O ->
+            "o の勝ち"
 
-    else if List.member Empty (Array.toList board) then
-        ""
-        --default
+        _ ->
+            --リストのメンバ関数にEmptyが含まれるか
+            if List.member Empty (Array.toList board) then
+                ""
 
-    else
-        "引き分け"
+            else
+                "引き分け"
 
 
 viewboard : Array Cell -> Html Msg
@@ -146,25 +142,35 @@ viewCell index cell =
     button [ style "width" "3em", style "height" "3em", style "padding" "0", onClick (Clicked index) ] [ text (cellToString cell) ]
 
 
+
+-- インデックスとその盤面を投げることでCellのマークがわかる
+
+
 cellAt : Int -> Array Cell -> Cell
-
-
-
--- cellAt i board =
---     drop i (Array.toList board)
---         |> List.head
---         |> Maybe.withDefault Empty
--- cellAt : Int -> Array Cell -> Cell
-
-
 cellAt i board =
     Array.get i board
         |> Maybe.withDefault Empty
 
 
-judge : Cell -> Array Cell -> Bool
-judge mark board =
-    List.any (\line -> List.all (\i -> cellAt i board == mark) line) winLines
+winnerOfLine : List Cell -> Maybe Cell
+winnerOfLine board =
+    case board of
+        [ X, X, X ] ->
+            Just X
+
+        [ O, O, O ] ->
+            Just O
+
+        _ ->
+            Nothing
+
+
+winner : Array Cell -> Maybe Cell
+winner board =
+    winLines
+        |> List.map (\line -> List.map (\i -> cellAt i board) line)
+        |> List.filterMap winnerOfLine
+        |> List.head
 
 
 winLines : List (List Int)
