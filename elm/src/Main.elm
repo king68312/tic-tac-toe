@@ -13,11 +13,11 @@ import List exposing (drop, take)
 
 
 type alias Model =
-    { board : Array Cell, turn : Cell, flag : Bool }
+    { board : Array Cell, turn : Cell }
 
 
-initialBoard : Model
-initialBoard =
+initialModel : Model
+initialModel =
     { board =
         Array.fromList
             [ Empty
@@ -31,7 +31,6 @@ initialBoard =
             , Empty
             ]
     , turn = X
-    , flag = False
     }
 
 
@@ -75,7 +74,7 @@ update msg model =
                     model
 
         Reset ->
-            initialBoard
+            initialModel
 
 
 nextTurn : Cell -> Cell
@@ -188,7 +187,7 @@ winLines =
 
 main =
     Browser.sandbox
-        { init = initialBoard
+        { init = initialModel
         , view = view
         , update = update
         }
