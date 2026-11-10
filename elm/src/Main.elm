@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array exposing (Array)
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
@@ -8,28 +9,45 @@ import List exposing (drop, take)
 import String exposing (join)
 
 
-
---import String exposing (concat)
-
-
 type alias Model =
-    { count : Int, board : List Cell, turn : Cell, flag : Bool }
+    { count : Int, board : Array Cell, turn : Cell, flag : Bool }
+
+
+
+-- initialBoard : Model
+-- initialBoard =
+--     { count = 0
+--     , board =
+--         [ Empty
+--         , Empty
+--         , Empty
+--         , Empty
+--         , O
+--         , Empty
+--         , Empty
+--         , Empty
+--         , Empty
+--         ]
+--     , turn = X
+--     , flag = False
+--     }
 
 
 initialBoard : Model
 initialBoard =
-    { count = 0
-    , board =
-        [ Empty
-        , Empty
-        , Empty
-        , Empty
-        , O
-        , Empty
-        , Empty
-        , Empty
-        , Empty
-        ]
+    { board =
+        Array.fromList
+            [ Empty
+            , Empty
+            , Empty
+            , Empty
+            , O
+            , Empty
+            , Empty
+            , Empty
+            , Empty
+            ]
+    , count = 0
     , turn = X
     , flag = False
     }
@@ -69,16 +87,19 @@ update msg model =
             -- placeAt model.turn index  Cell->Int->Cell->Cell　これはindexecMapの引数(Int->a->b)と一致する。
             -- model.boardはList cellなので正しい
             -- markを入れた状態のマスのCellを返す
-            let
-                newBoard =
-                    List.indexedMap (placeAt model.turn index) model.board
-            in
-            if newBoard == model.board then
-                model
+            -- ここでしたい処理は
+            -- newBoard =
+            --     List.indexedMap (placeAt model.turn index) model.board
+            -- indexにボードが置ける場合
+            case Array.get index model.board of
+                Just Empty ->
+                    { model | board = Array.set index model.turn model.board, turn = nextTurn model.turn }
 
-            else
-                { model | board = newBoard, turn = nextTurn model.turn }
+                _ ->
+                    model
 
+        --            else
+        --                { model | board = newBoard, turn = nextTurn model.turn }
         {-
            case List.head (List.drop index model.board) of
                Just cell ->
@@ -100,15 +121,13 @@ update msg model =
 
 -- placeAt indexで targetは入っている状態。マスの番号とマスはList.indexedMapで1マスずつ渡していく
 -- indexedMapは(Int -> a -> b) -> List a -> List b
-
-
-placeAt : Cell -> Int -> Int -> Cell -> Cell
-placeAt mark target i c =
-    if i == target && c == Empty then
-        mark
-
-    else
-        c
+-- placeAt : Cell -> Int -> Int -> Cell -> Cell
+-- placeAt mark target i c =
+--     if i == target && c == Empty then
+--         mark
+--
+--     else
+--         c
 
 
 nextTurn : Cell -> Cell
@@ -143,7 +162,7 @@ view model =
         ]
 
 
-resultText : List Cell -> String
+resultText : Array Cell -> String
 resultText board =
     if judge X board then
         "x の勝ち"
@@ -151,8 +170,9 @@ resultText board =
     else if judge O board then
         "o の勝ち"
 
-    else if List.member Empty board then
+    else if List.member Empty (Array.toList board) then
         ""
+        --default
 
     else
         "引き分け"
@@ -179,17 +199,17 @@ resultText board =
 -}
 
 
-viewboard : List Cell -> Html Msg
+viewboard : Array Cell -> Html Msg
 viewboard board =
     let
         --indexedMapは(Int -> a -> b) -> List a -> List b boardはList Cell
         cells =
-            List.indexedMap viewCell board
+            Array.indexedMap viewCell board
     in
     div []
-        [ div [ style "display" "flex" ] (take 3 cells)
-        , div [ style "display" "flex" ] (take 3 (drop 3 cells))
-        , div [ style "display" "flex" ] (take 3 (drop 6 cells))
+        [ div [ style "display" "flex" ] (take 3 (Array.toList cells))
+        , div [ style "display" "flex" ] (take 3 (drop 3 (Array.toList cells)))
+        , div [ style "display" "flex" ] (take 3 (drop 6 (Array.toList cells)))
         ]
 
 
@@ -198,14 +218,14 @@ viewCell index cell =
     button [ style "width" "3em", style "height" "3em", style "padding" "0", onClick (Clicked index) ] [ text (cellToString cell) ]
 
 
-cellAt : Int -> List Cell -> Cell
+cellAt : Int -> Array Cell -> Cell
 cellAt i board =
-    List.drop i board
+    drop i (Array.toList board)
         |> List.head
         |> Maybe.withDefault Empty
 
 
-judge : Cell -> List Cell -> Bool
+judge : Cell -> Array Cell -> Bool
 judge mark board =
     List.any (\line -> List.all (\i -> cellAt i board == mark) line) winLines
 
