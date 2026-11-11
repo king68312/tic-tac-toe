@@ -1,13 +1,8 @@
 #include "view.h"
 
-#include <termios.h>
-#include <unistd.h>
-
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "controller.h"
 
 void saveOrigin() {  // 端末のカーソル位置を保存する
   std::cout << "\0337" << std::flush;
@@ -35,5 +30,28 @@ void printBoard(const std::vector<std::string>& board) {
         std::cout << "-----------" << std::endl;
       }
     }
+  }
+}
+
+void printGuide() { std::cout << "矢印キーで移動(q で終了)" << std::endl; }
+
+void printQuit() { std::cout << "ゲームを終了します。" << std::endl; }
+
+void printRetryPrompt() {
+  std::cout << "もう一度プレイしますか？(y/n): " << std::flush;
+}
+
+// winner が "" なら引き分けとして表示する
+void printResult(const std::vector<std::string>& board,
+                 const std::string& winner) {
+  std::cout << "                " << std::endl;
+  std::cout << "------結果------" << std::endl;
+  std::cout << "                " << std::endl;
+  printBoard(board);
+  std::cout << "                " << std::endl;
+  if (winner != "") {
+    std::cout << "勝者は: " << winner << std::endl;
+  } else {
+    std::cout << "引き分け" << std::endl;
   }
 }

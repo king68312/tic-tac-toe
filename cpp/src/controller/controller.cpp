@@ -15,11 +15,11 @@ bool playGame() {
   int pos;
   board[4] = "o";  // 初期状態で中央にoを置く
   for (int i = 0; i < 8; i++) {
-    std::cout << "矢印キーで移動(q で終了)" << std::endl;
+    printGuide();
     printBoard(board);
     pos = selectCell(board);
     if (pos == -1) {
-      std::cout << "ゲームを終了します。" << std::endl;
+      printQuit();
       return false;
     }
     if (i % 2 == 0) {
@@ -30,34 +30,25 @@ bool playGame() {
 
     // x先行でそのあとはoと交互に入力する
     if (judge(board) != "") {
-      std::cout << "                " << std::endl;
-      std::cout << "------結果------" << std::endl;
-      std::cout << "                " << std::endl;
-      printBoard(board);
-      std::cout << "                " << std::endl;
-      std::cout << "勝者は: " << judge(board) << std::endl;
+      printResult(board, judge(board));
       return true;
     }
   }
 
-  std::cout << "                " << std::endl;
-  std::cout << "------結果------" << std::endl;
-  std::cout << "                " << std::endl;
-  printBoard(board);
-  std::cout << "引き分け" << std::endl;
+  printResult(board, "");
   return true;
 }
 
 bool retry() {
   char choice;
-  std::cout << "もう一度プレイしますか？(y/n): ";
+  printRetryPrompt();
   std::cin >> choice;
   std::cin.ignore(std::numeric_limits<std::streamsize>::max(),
                   '\n');  // 入力バッファをクリア
   if (choice == 'y' || choice == 'Y') {
     return true;
   } else {
-    std::cout << "ゲームを終了します。" << std::endl;
+    printQuit();
     return false;
   }
 }

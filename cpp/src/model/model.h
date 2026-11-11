@@ -15,6 +15,4 @@ const int LINES[8][3] = {
     {0, 4, 8}, {2, 4, 6}              // diagonals
 };
 
-enum class Key { kUp, kDown, kLeft, kRight, kEnter, kQuit, kOther };
-
 int toIndex(Position pos);
